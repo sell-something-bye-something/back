@@ -1,19 +1,20 @@
 const express = require('express')
 const app =express()
 const mongoose = require('mongoose')
-const Thing = require('./model/ThingSchema')
-
+const thingrouter = require('./routes/thingrouter')
+const userrouter = require('./routes/userrouter')
 
 // connect to database
 DB_Url   ='mongodb+srv://saif:dellpc@cluster0.f0kca.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
 mongoose.connect(
-  DB_Url, {useUnifiedTopology : true , useNewUrlParser : true})
+  DB_Url, {useUnifiedTopology : true , useNewUrlParser : true,useFindAndModify: false})
   .then(()=>{
     console.log('database connected');
   }).catch(
     (err)=>{
       console.log(err ,   'cpnnection error');
     })
+    
 
 
 
@@ -38,47 +39,10 @@ app.use((req, res, next) => {
 
 
 app.use(express.json())
+app.use('/api/stuff' , thingrouter)
+app.use('/api/auth' , userrouter)
 
 // save to dataase 
-app.post('/api/stuff', (req, res ) => {
-const {title , description,imageUrl,userId,price}=req.body
-// console.log(title, description , imageUrl , userId , price);
-const thing = new Thing(
- { title,
-   description ,
-   imageUrl ,
-   userId ,
-   price,}
-)
-thing.save().then(()=>{
-  res.status(201).json({msg : 'Post Created succefully'});
-}).catch(
-  (err)=>{
-    res.status(400).json({
-      error  : err
-    })
 
-})
-    
-
-// retreive data from database 
-app.get('/api/stuff', async(req, res) => {
-  // try{
-    const thin = await Thing.find()
-    res.json(thin)
-    console.log('object');
-
-  // }
-  // catch(err){
-  //   res.json({error : err })
-
-  // }
-  
-});
-
-    
-
-
-});
 
 module.exports=app
