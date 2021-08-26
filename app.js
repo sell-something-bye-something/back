@@ -3,6 +3,7 @@ const app =express()
 const mongoose = require('mongoose')
 const thingrouter = require('./routes/thingrouter')
 const userrouter = require('./routes/userrouter')
+const path = require('path')
 
 // connect to database
 DB_Url   ='mongodb+srv://saif:dellpc@cluster0.f0kca.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
@@ -41,6 +42,7 @@ app.use((req, res, next) => {
 app.use(express.json())
 app.use('/api/stuff' , thingrouter)
 app.use('/api/auth' , userrouter)
+app.use('/images' , express.static(path.join(__dirname , 'imagesFolder')))
 
 // save to dataase 
 

@@ -1,10 +1,13 @@
 const Thing = require('../model/ThingSchema')
-
+const fs = require('fs')
 
 
 exports.postThing=async(req, res ) => {
+  req.body.thing = JSON.parse(req.body.thing )
+  url = req.protocol +'://'+req.get('host')
     try{
-      const {title , description,imageUrl,userId,price}=req.body
+      const {title , description,userId,price}=req.body.thing
+      const imageUrl = url + '/images/'+req.file.filename
   // console.log(title, description , imageUrl , userId , price);
   const thing = new Thing(
    { title,
@@ -42,6 +45,13 @@ exports.postThing=async(req, res ) => {
 
   exports.deleteThing =  async(req,res)=>{
     const{id}=req.params
+    Thing.findById(id).then(
+      (thing)=>{
+      const filename = thing.imageUrl.split('/images/')[1]
+      fs.unlink('../imagesFolder/'+filename)
+
+    })
+
      await Thing.findOneAndDelete({_id:id})
     res.status(200).json({msg:'Deleted!'})
   }
@@ -50,15 +60,35 @@ exports.postThing=async(req, res ) => {
 
 
   exports.putThing= (req, res, next) => {
+    let title , description , imageUrl , price  , userId
+    let _id = req.params.id
+    if (req.file){
+      url = req.protocol +'://'+req?.get('host')
+      req.body.thing= JSON.parse(req.body.thing) ; 
+      ({title ,
+        description,
+        userId,
+        price}=req.body.thing)
+        imageUrl = url + '/images/'+req.file.filename
+    }
+    else{
+     ({title ,
+      imageUrl ,
+      description,
+      userId,price
+      }=req.body)
+      
+    }
     const thing = new Thing({
-      _id: req.params.id,
-      title: req.body.title,
-      description: req.body.description,
-      imageUrl: req.body.imageUrl,
-      price: req.body.price,
-      userId: req.body.userId
+      _id, 
+      title : title,
+      imageUrl,  
+      description, 
+      price,
+      userId
     });
-    Thing.updateOne({_id: req.params.id}, thing).then(
+    
+    Thing.updateOne({_id}, thing).then(
       () => {
         res.status(201).json({
           message: 'Thing updated successfully!'
