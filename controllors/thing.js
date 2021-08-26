@@ -48,12 +48,17 @@ exports.postThing=async(req, res ) => {
     Thing.findById(id).then(
       (thing)=>{
       const filename = thing.imageUrl.split('/images/')[1]
-      fs.unlink('../imagesFolder/'+filename)
+      fs.unlink('imagesFolder/'+filename , ()=>{
+        console.log('doooo');
+         Thing.findOneAndDelete({_id:id}).then(()=>{
+             res.status(200).json({msg:'Deleted!'})
+        })
+      
+      })
 
     })
 
-     await Thing.findOneAndDelete({_id:id})
-    res.status(200).json({msg:'Deleted!'})
+   
   }
 
 
